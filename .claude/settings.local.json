@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest petty --ts --tailwind --app --no-src-dir --eslint --import-alias \"@/*\" --yes)",
+      "Bash(npm --version)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "mcp__9367512e-8ae0-4b66-9fda-90833db8225e__apply_migration",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)",
+      "Bash(ls /Users/shazilmohammed/Documents/Petty/app/pets/[id]/ /Users/shazilmohammed/Documents/Petty/lib/ /Users/shazilmohammed/Documents/Petty/components/)",
+      "Bash(ls /Users/shazilmohammed/Documents/Petty/lib/db /Users/shazilmohammed/Documents/Petty/lib/log /Users/shazilmohammed/Documents/Petty/tests /Users/shazilmohammed/Documents/Petty/app/pets/[id]/log/)",
+      "Bash(grep -n \"user_household_ids\" /Users/shazilmohammed/Documents/Petty/migrations/*.sql)"
+    ]
+  }
+}
