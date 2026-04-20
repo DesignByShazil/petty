@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/db/server'
 import { PetForm } from '@/components/pet-form'
+import { PetAvatarUploader } from '@/components/pet-avatar-uploader'
 import { ConditionsSection } from '@/components/conditions-section'
 import { MedicationsSection } from '@/components/medications-section'
 import { RecentEntries } from '@/components/recent-entries'
 import { signedUrlsForPaths } from './log/[entryId]/media-actions'
+import { signedAvatarUrls } from '../avatar-actions'
 import { updatePet } from '../actions'
 
 export default async function PetOverviewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,7 +26,13 @@ export default async function PetOverviewPage({ params }: { params: Promise<{ id
 
   if (!pet) notFound()
 
-  const [{ data: conditions }, { data: medications }, { data: entries }, { data: summaries }] = await Promise.all([
+  const [
+    { data: conditions },
+    { data: medications },
+    { data: entries },
+    { data: summaries },
+    avatarUrlMap,
+  ] = await Promise.all([
     supabase.from('condition').select('*').eq('pet_id', id).order('created_at', { ascending: false }),
     supabase.from('medication').select('*').eq('pet_id', id).order('created_at', { ascending: false }),
     supabase
@@ -40,6 +48,7 @@ export default async function PetOverviewPage({ params }: { params: Promise<{ id
       .eq('pet_id', id)
       .order('created_at', { ascending: false })
       .limit(5),
+    pet.avatar_url ? signedAvatarUrls([pet.avatar_url]) : Promise.resolve({} as Record<string, string>),
   ])
 
   const entryIds = (entries ?? []).map((e) => e.id)
@@ -63,85 +72,114 @@ export default async function PetOverviewPage({ params }: { params: Promise<{ id
     })
   }
 
+  const avatarSignedUrl = pet.avatar_url ? (avatarUrlMap[pet.avatar_url] ?? null) : null
   const updatePetAction = updatePet.bind(null, pet.id)
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12 space-y-10">
-      <div>
-        <Link href="/pets" className="text-sm text-stone-500 hover:text-stone-700">
-          ← All pets
+    <main className="mx-auto max-w-3xl px-4 py-14 space-y-12">
+      <div className="anim-fade-up">
+        <Link
+          href="/pets"
+          className="inline-flex items-center gap-1.5 text-sm text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--ink)]"
+        >
+          <span aria-hidden="true">←</span> All pets
         </Link>
-        <div className="mt-2 flex items-baseline justify-between gap-4">
+
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-semibold">{pet.name}</h1>
-            <p className="text-sm text-stone-500">
-              {pet.species}
-              {pet.breed ? ` · ${pet.breed}` : ''}
-            </p>
+            <p className="eyebrow">{pet.species}{pet.breed ? ` · ${pet.breed}` : ''}</p>
+            <h1 className="mt-1 font-display text-5xl leading-none text-[color:var(--ink)]">
+              {pet.name}
+            </h1>
+            {pet.weight_kg && (
+              <p className="mt-3 text-sm text-[color:var(--ink-soft)]">
+                {pet.weight_kg} kg
+                {pet.date_of_birth ? ` · born ${new Date(pet.date_of_birth).toLocaleDateString()}` : ''}
+              </p>
+            )}
           </div>
           <Link
             href={`/pets/${pet.id}/timeline`}
-            className="text-sm text-stone-600 hover:text-stone-900 underline"
+            className="btn btn-ghost"
           >
-            Full timeline
+            Full timeline →
           </Link>
         </div>
       </div>
 
-      <RecentEntries
-        petId={pet.id}
-        entries={entries ?? []}
-        currentUserId={user.id}
-        mediaByEntry={mediaByEntry}
-      />
+      <section className="surface p-6 anim-fade-up" style={{ animationDelay: '60ms' }}>
+        <PetAvatarUploader
+          petId={pet.id}
+          petName={pet.name}
+          initialSrc={avatarSignedUrl}
+          hasAvatar={!!pet.avatar_url}
+        />
+      </section>
 
-      <section>
-        <h2 className="text-sm font-medium text-stone-700 mb-3 uppercase tracking-wide">Baseline</h2>
-        <div className="rounded-xl border border-stone-200 bg-white p-6">
+      <div className="anim-fade-up" style={{ animationDelay: '120ms' }}>
+        <RecentEntries
+          petId={pet.id}
+          entries={entries ?? []}
+          currentUserId={user.id}
+          mediaByEntry={mediaByEntry}
+        />
+      </div>
+
+      <section className="anim-fade-up" style={{ animationDelay: '180ms' }}>
+        <h2 className="eyebrow mb-3">Baseline</h2>
+        <div className="surface p-6">
           <PetForm action={updatePetAction} pet={pet} submitLabel="Save changes" />
         </div>
       </section>
 
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-stone-700 uppercase tracking-wide">
-            Summaries
-          </h2>
+      <section className="anim-fade-up" style={{ animationDelay: '240ms' }}>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="eyebrow">Summaries</h2>
           <Link
             href={`/pets/${pet.id}/summary/new`}
-            className="rounded-lg bg-stone-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-stone-700"
+            className="btn btn-sage"
+            style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
           >
-            New summary
+            + New summary
           </Link>
         </div>
         {summaries && summaries.length > 0 ? (
           <ul className="space-y-2">
             {summaries.map((s) => (
-              <li key={s.id} className="rounded-lg border border-stone-200 bg-white px-4 py-3">
-                <Link href={`/pets/${pet.id}/summary/${s.id}`} className="flex items-center justify-between gap-3">
+              <li key={s.id} className="surface surface-hover">
+                <Link href={`/pets/${pet.id}/summary/${s.id}`} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div>
-                    <p className="text-sm font-medium text-stone-800">{s.kind.replace('_', ' ')}</p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-sm font-medium text-[color:var(--ink)]">
+                      {s.kind.replace('_', ' ')}
+                    </p>
+                    <p className="text-xs text-[color:var(--ink-soft)]">
                       {s.range_start ? new Date(s.range_start).toLocaleDateString() : ''}
                       {s.range_end ? ` → ${new Date(s.range_end).toLocaleDateString()}` : ''}
                     </p>
                   </div>
-                  <span className="text-xs text-stone-400">{s.status}</span>
+                  <span className="chip">{s.status}</span>
                 </Link>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="rounded-xl border border-dashed border-stone-200 bg-white px-6 py-8 text-center">
-            <p className="text-sm text-stone-500">
-              No summaries yet. Generate one before your next vet visit.
+          <div className="surface border-dashed px-6 py-10 text-center">
+            <p className="font-display text-lg text-[color:var(--ink)]">
+              No summaries yet
+            </p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-[color:var(--ink-soft)]">
+              Generate one before your next vet visit.
             </p>
           </div>
         )}
       </section>
 
-      <ConditionsSection petId={pet.id} conditions={conditions ?? []} />
-      <MedicationsSection petId={pet.id} medications={medications ?? []} />
+      <div className="anim-fade-up" style={{ animationDelay: '300ms' }}>
+        <ConditionsSection petId={pet.id} conditions={conditions ?? []} />
+      </div>
+      <div className="anim-fade-up" style={{ animationDelay: '360ms' }}>
+        <MedicationsSection petId={pet.id} medications={medications ?? []} />
+      </div>
     </main>
   )
 }

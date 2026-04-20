@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/db/server'
 import { ReminderRow } from '@/components/reminder-row'
+import { PetsList } from '@/components/pets-list'
 import { bucketFor } from '@/lib/reminders/schedule'
+import { signedAvatarUrls } from './avatar-actions'
 
 type ReminderRowLite = {
   id: string
@@ -26,7 +28,7 @@ export default async function PetsPage() {
   const [{ data: pets }, { data: reminders }] = await Promise.all([
     supabase
       .from('pet')
-      .select('id, name, species, breed')
+      .select('id, name, species, breed, avatar_url')
       .is('deleted_at', null)
       .order('created_at', { ascending: false }),
     supabase
@@ -38,6 +40,17 @@ export default async function PetsPage() {
       .limit(20),
   ])
 
+  const avatarPaths = (pets ?? []).map((p) => p.avatar_url).filter((v): v is string => !!v)
+  const avatarUrlMap = await signedAvatarUrls(avatarPaths)
+
+  const petCards = (pets ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    species: p.species,
+    breed: p.breed,
+    avatarUrl: p.avatar_url ? (avatarUrlMap[p.avatar_url] ?? null) : null,
+  }))
+
   const now = new Date()
   const dueToday = ((reminders ?? []) as unknown as ReminderRowLite[]).filter((r) => {
     const b = bucketFor(new Date(r.due_at), now)
@@ -45,15 +58,38 @@ export default async function PetsPage() {
   })
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto max-w-3xl px-4 py-14">
+      <header className="mb-10 flex items-end justify-between anim-fade-up">
+        <div>
+          <p className="eyebrow">Your household</p>
+          <h1 className="mt-1 font-display text-4xl leading-none text-[color:var(--ink)]">
+            Pets
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href="/reminders" className="btn btn-ghost">
+            Reminders
+          </Link>
+          <Link href="/pets/new" className="btn btn-primary">
+            <span>+</span>
+            <span>Add pet</span>
+          </Link>
+        </div>
+      </header>
+
       {dueToday.length > 0 && (
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-stone-700 uppercase tracking-wide">
+        <section className="mb-10 anim-fade-up" style={{ animationDelay: '60ms' }}>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="eyebrow">
               Due today
-              <span className="ml-2 text-xs font-normal text-stone-400">{dueToday.length}</span>
+              <span className="ml-2 text-xs font-normal text-[color:var(--ink-mute)]">
+                {dueToday.length}
+              </span>
             </h2>
-            <Link href="/reminders" className="text-xs text-stone-500 underline hover:text-stone-900">
+            <Link
+              href="/reminders"
+              className="text-xs text-[color:var(--ink-soft)] underline hover:text-[color:var(--ink)]"
+            >
               All reminders
             </Link>
           </div>
@@ -65,51 +101,20 @@ export default async function PetsPage() {
         </section>
       )}
 
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-semibold">Your pets</h1>
-        <div className="flex items-center gap-3">
-          <Link href="/reminders" className="text-sm text-stone-600 hover:text-stone-900 underline">
-            Reminders
-          </Link>
-          <Link
-            href="/pets/new"
-            className="rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
-          >
-            Add pet
-          </Link>
-        </div>
-      </div>
-
-      {!pets || pets.length === 0 ? (
-        <div className="rounded-xl border border-stone-200 bg-white px-6 py-10 text-center">
-          <p className="text-stone-500 text-sm mb-4">No pets yet. Create your first one.</p>
-          <Link
-            href="/pets/new"
-            className="inline-block rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
-          >
+      {petCards.length === 0 ? (
+        <div className="surface px-8 py-14 text-center anim-fade-up">
+          <p className="font-display text-2xl text-[color:var(--ink)]">
+            A quiet household.
+          </p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-[color:var(--ink-soft)]">
+            Add your first pet to start tracking symptoms, meals, and vet notes.
+          </p>
+          <Link href="/pets/new" className="btn btn-sage mt-6">
             Add your first pet
           </Link>
         </div>
       ) : (
-        <ul className="space-y-3">
-          {pets.map((p) => (
-            <li key={p.id}>
-              <Link
-                href={`/pets/${p.id}`}
-                className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 hover:border-stone-300"
-              >
-                <div>
-                  <p className="font-medium">{p.name}</p>
-                  <p className="text-xs text-stone-500">
-                    {p.species}
-                    {p.breed ? ` · ${p.breed}` : ''}
-                  </p>
-                </div>
-                <span className="text-stone-400 text-sm">→</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <PetsList pets={petCards} />
       )}
     </main>
   )
