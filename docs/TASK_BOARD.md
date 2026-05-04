@@ -120,12 +120,23 @@
 
 ---
 
+## Task 7 — Household invites
+- Status: `in_progress`
+- Goal: Owner sends an email invite; invitee signs in and joins the household as a caretaker
+- Subtasks:
+  - [ ] Migration: `invite` table (token, email, household_id, invited_by, expires_at, accepted_at)
+  - [ ] Server action: `createInvite` — owner only, generates token, emails magic-link style invite
+  - [ ] `/invite/[token]` accept page — validates token, upserts `household_member`, marks accepted
+  - [ ] `/settings/household` — member list + invite form + remove member (owner only)
+  - [ ] Test: create invite, accept invite, expired token rejected, non-owner cannot invite
+- Success: Owner invites a caretaker by email; caretaker sees the same pets after signing in
+- Effort: Medium
+
 ## Backlog (deferred)
 - [ ] Wearable / smart collar integration
 - [ ] Live telehealth or in-app vet consultations
 - [ ] In-app store / affiliate recommendations
 - [ ] Vet-facing portal
-- [ ] Household invite flow (MVP ships solo; invite is task 7+)
 - [ ] Billing (Stripe) — after retention is proven
 
 ## Completed

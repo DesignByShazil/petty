@@ -51,6 +51,141 @@ export type Database = {
         Update: { created_at?: string; id?: string; name?: string; owner_id?: string }
         Relationships: []
       }
+      household_member: {
+        Row: {
+          created_at: string
+          household_id: string
+          id: string
+          invited_email: string | null
+          role: Database["public"]["Enums"]["member_role"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          id?: string
+          invited_email?: string | null
+          role?: Database["public"]["Enums"]["member_role"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          id?: string
+          invited_email?: string | null
+          role?: Database["public"]["Enums"]["member_role"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      reminder: {
+        Row: {
+          id: string
+          pet_id: string
+          medication_id: string | null
+          kind: Database["public"]["Enums"]["reminder_kind"]
+          title: string
+          due_at: string
+          status: Database["public"]["Enums"]["reminder_status"]
+          resolved_at: string | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          pet_id: string
+          medication_id?: string | null
+          kind: Database["public"]["Enums"]["reminder_kind"]
+          title: string
+          due_at: string
+          status?: Database["public"]["Enums"]["reminder_status"]
+          resolved_at?: string | null
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          pet_id?: string
+          medication_id?: string | null
+          kind?: Database["public"]["Enums"]["reminder_kind"]
+          title?: string
+          due_at?: string
+          status?: Database["public"]["Enums"]["reminder_status"]
+          resolved_at?: string | null
+          notes?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      medication_dose: {
+        Row: {
+          id: string
+          medication_id: string
+          pet_id: string
+          reminder_id: string | null
+          given_by: string | null
+          outcome: Database["public"]["Enums"]["dose_outcome"]
+          occurred_at: string
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          medication_id: string
+          pet_id: string
+          reminder_id?: string | null
+          given_by?: string | null
+          outcome: Database["public"]["Enums"]["dose_outcome"]
+          occurred_at?: string
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          medication_id?: string
+          pet_id?: string
+          reminder_id?: string | null
+          given_by?: string | null
+          outcome?: Database["public"]["Enums"]["dose_outcome"]
+          occurred_at?: string
+          notes?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      invite: {
+        Row: {
+          id: string
+          household_id: string
+          invited_by: string
+          email: string
+          token: string
+          expires_at: string
+          accepted_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          household_id: string
+          invited_by: string
+          email: string
+          token?: string
+          expires_at?: string
+          accepted_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          household_id?: string
+          invited_by?: string
+          email?: string
+          token?: string
+          expires_at?: string
+          accepted_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       log_entry: {
         Row: {
           author_id: string
@@ -93,33 +228,6 @@ export type Database = {
           structured?: Json
           tags?: string[]
           updated_at?: string
-        }
-        Relationships: []
-      }
-      household_member: {
-        Row: {
-          created_at: string
-          household_id: string
-          id: string
-          invited_email: string | null
-          role: Database["public"]["Enums"]["member_role"]
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          household_id: string
-          id?: string
-          invited_email?: string | null
-          role?: Database["public"]["Enums"]["member_role"]
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          household_id?: string
-          id?: string
-          invited_email?: string | null
-          role?: Database["public"]["Enums"]["member_role"]
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -204,81 +312,6 @@ export type Database = {
           prescribed_by?: string | null
           schedule?: string | null
           start_date?: string | null
-        }
-        Relationships: []
-      }
-      reminder: {
-        Row: {
-          id: string
-          pet_id: string
-          medication_id: string | null
-          kind: Database["public"]["Enums"]["reminder_kind"]
-          title: string
-          due_at: string
-          status: Database["public"]["Enums"]["reminder_status"]
-          resolved_at: string | null
-          notes: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          pet_id: string
-          medication_id?: string | null
-          kind: Database["public"]["Enums"]["reminder_kind"]
-          title: string
-          due_at: string
-          status?: Database["public"]["Enums"]["reminder_status"]
-          resolved_at?: string | null
-          notes?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          pet_id?: string
-          medication_id?: string | null
-          kind?: Database["public"]["Enums"]["reminder_kind"]
-          title?: string
-          due_at?: string
-          status?: Database["public"]["Enums"]["reminder_status"]
-          resolved_at?: string | null
-          notes?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      medication_dose: {
-        Row: {
-          id: string
-          medication_id: string
-          pet_id: string
-          reminder_id: string | null
-          given_by: string | null
-          outcome: Database["public"]["Enums"]["dose_outcome"]
-          occurred_at: string
-          notes: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          medication_id: string
-          pet_id: string
-          reminder_id?: string | null
-          given_by?: string | null
-          outcome: Database["public"]["Enums"]["dose_outcome"]
-          occurred_at?: string
-          notes?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          medication_id?: string
-          pet_id?: string
-          reminder_id?: string | null
-          given_by?: string | null
-          outcome?: Database["public"]["Enums"]["dose_outcome"]
-          occurred_at?: string
-          notes?: string | null
-          created_at?: string
         }
         Relationships: []
       }
@@ -425,9 +458,15 @@ export type Database = {
       }
     }
     Views: Record<string, never>
-    Functions: { user_household_ids: { Args: Record<string, never>; Returns: string[] } }
+    Functions: {
+      user_household_ids: { Args: Record<string, never>; Returns: string[] }
+      accept_invite: { Args: { p_token: string }; Returns: string }
+    }
     Enums: {
       condition_status: "active" | "resolved" | "monitoring"
+      reminder_kind: "medication" | "vet_followup" | "custom"
+      reminder_status: "pending" | "done" | "skipped"
+      dose_outcome: "given" | "missed" | "refused"
       log_kind:
         | "symptom"
         | "behavior"
@@ -442,9 +481,6 @@ export type Database = {
       subscription_tier: "free" | "pro"
       summary_kind: "vet_visit" | "range" | "issue"
       summary_status: "draft" | "final"
-      reminder_kind: "medication" | "vet_followup" | "custom"
-      reminder_status: "pending" | "done" | "skipped"
-      dose_outcome: "given" | "missed" | "refused"
     }
     CompositeTypes: Record<string, never>
   }
@@ -463,14 +499,17 @@ export type SummaryKind = Database["public"]["Enums"]["summary_kind"]
 export type SummaryStatus = Database["public"]["Enums"]["summary_status"]
 export type Reminder = Database["public"]["Tables"]["reminder"]["Row"]
 export type ReminderInsert = Database["public"]["Tables"]["reminder"]["Insert"]
-export type ReminderKind = Database["public"]["Enums"]["reminder_kind"]
-export type ReminderStatus = Database["public"]["Enums"]["reminder_status"]
 export type MedicationDose = Database["public"]["Tables"]["medication_dose"]["Row"]
 export type DoseOutcome = Database["public"]["Enums"]["dose_outcome"]
+export type ReminderKind = Database["public"]["Enums"]["reminder_kind"]
+export type ReminderStatus = Database["public"]["Enums"]["reminder_status"]
+export type Invite = Database["public"]["Tables"]["invite"]["Row"]
+export type HouseholdMember = Database["public"]["Tables"]["household_member"]["Row"]
 export type Species = Database["public"]["Enums"]["species_kind"]
 export type Sex = Database["public"]["Enums"]["sex_kind"]
 export type ConditionStatus = Database["public"]["Enums"]["condition_status"]
 export type LogKind = Database["public"]["Enums"]["log_kind"]
+export type MemberRole = Database["public"]["Enums"]["member_role"]
 
 export const LOG_KINDS: LogKind[] = [
   "symptom",

@@ -70,6 +70,9 @@ export default async function PetsPage() {
           <Link href="/reminders" className="btn btn-ghost">
             Reminders
           </Link>
+          <Link href="/settings/household" className="btn btn-ghost">
+            Household
+          </Link>
           <Link href="/pets/new" className="btn btn-primary">
             <span>+</span>
             <span>Add pet</span>
